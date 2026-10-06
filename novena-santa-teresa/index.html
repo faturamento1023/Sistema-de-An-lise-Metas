@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6f3c2f">
+<meta name="description" content="Novena interativa de Santa Teresa d'Ávila — 6 a 14 de outubro de 2026.">
+<title>Novena de Santa Teresa d'Ávila</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap bar"><div class="brand"><span class="cross">✝</span><span>Novena de Santa Teresa d’Ávila</span></div><div class="top-actions"><button id="share">↗ <span>Compartilhar</span></button><button id="theme" aria-label="Alternar tema">◐</button></div></div></header>
+
+<section class="hero"><div class="wrap hero-grid">
+<div class="hero-copy">
+<div class="kicker">6 a 14 de outubro • Festa em 15 de outubro</div>
+<h1>9 dias com<br>Santa Teresa</h1>
+<p>Uma caminhada de oração, silêncio e amizade com Deus. A página reconhece a data e mostra automaticamente o dia certo da novena.</p>
+<blockquote>“Nada te perturbe, nada te espante. Tudo passa; Deus não muda. Só Deus basta.” <small>— Santa Teresa de Jesus</small></blockquote>
+</div>
+<figure class="hero-image"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/SantaTeresa.jpg" alt="Santa Teresa d'Ávila escrevendo"><figcaption>Santa Teresa d’Ávila • arte histórica em domínio público</figcaption></figure>
+</div></section>
+
+<main class="wrap">
+<section class="status">
+<div class="stat big"><strong id="todayTitle">Carregando…</strong><span id="todaySub"></span><div class="progress"><i id="progress"></i></div></div>
+<div class="stat"><strong id="doneCount">0 de 9</strong><span>dias rezados</span></div>
+<div class="stat"><strong id="countdown">—</strong><span>para a festa</span></div>
+</section>
+
+<nav id="days" class="days" aria-label="Dias da novena"></nav>
+
+<div class="layout">
+<article id="card" class="card"></article>
+<aside class="side">
+<section class="box"><h3>Minha intenção</h3><p>Escreva a graça ou pessoa que deseja confiar a Deus. Fica salva somente neste aparelho.</p><textarea id="intention" placeholder="Senhor, nesta novena eu Vos confio…"></textarea></section>
+<section class="box"><h3>Como rezar</h3><ul><li>Sinal da Cruz</li><li>Apresente sua intenção</li><li>Leia a meditação</li><li>Faça um instante de silêncio</li><li>Reze a oração do dia</li><li>Pai-Nosso, Ave-Maria e Glória</li><li>Santa Teresa d’Ávila, rogai por nós</li></ul></section>
+<section class="box"><h3>Um passo por dia</h3><p>Os próximos dias ficam bloqueados até a data correspondente. Os dias já passados continuam disponíveis.</p></section>
+</aside>
+</div>
+</main>
+
+<footer><div class="wrap foot">Conteúdo devocional inspirado nos temas da novena publicada pela Comunidade Católica Shalom. Meditações e orações desta página foram redigidas em linguagem própria. Imagens históricas: Wikimedia Commons.</div></footer>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
