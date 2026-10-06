@@ -88,6 +88,7 @@ var TODAY=spDate();
 var REAL=idx(TODAY);
 var SELECTED=Math.min(Math.max(REAL,0),8);
 if(REAL>8)SELECTED=8;
+var IN_PRAYER=false;
 
 function unlocked(i){return REAL>=i||REAL>8}
 
@@ -118,7 +119,7 @@ function renderDays(){
     b.disabled=!unlocked(i);
     b.dataset.i=i;
     b.innerHTML="<b>Dia "+(i+1)+(d.indexOf(i)>=0?" ✓":"")+"</b><small>"+String(6+i).padStart(2,"0")+"/10"+(!unlocked(i)?" • 🔒":"")+"</small>";
-    b.addEventListener("click",function(){SELECTED=Number(this.dataset.i);render();document.getElementById("card").scrollIntoView({behavior:"smooth",block:"start"})});
+    b.addEventListener("click",function(){IN_PRAYER=false;document.body.classList.remove("focus");SELECTED=Number(this.dataset.i);render();document.getElementById("card").scrollIntoView({behavior:"smooth",block:"start"})});
     nav.appendChild(b);
   }
 }
@@ -129,6 +130,71 @@ function prayerDetails(){
   return out;
 }
 
+function heroBlock(d,date){
+  return "<div class='visual'><img src='"+IMAGES[SELECTED%IMAGES.length]+"' alt='Arte histórica relacionada a Santa Teresa d\\'Ávila'><div class='vtitle'><span>"+(SELECTED+1)+"º dia • "+fmt(date)+"</span><h2>"+d.title+"</h2></div></div>";
+}
+
+function startPrayer(){
+  if(SELECTED===0)localStorage.setItem("teresaLearned","yes");
+  IN_PRAYER=true;
+  document.body.classList.add("focus");
+  renderCard();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderIntro(card,d,date,isDone){
+  var learned=localStorage.getItem("teresaLearned")==="yes";
+
+  if(SELECTED===0&&!learned){
+    card.innerHTML=
+      heroBlock(d,date)+
+      "<div class='content onboarding'>"+
+        "<div class='intro-badge'>Antes de começar</div>"+
+        "<h2>Como rezar esta novena</h2>"+
+        "<p class='lead'>Você só precisa aprender o passo a passo hoje. Nos próximos dias, estas instruções não aparecem novamente.</p>"+
+        "<div class='how-grid'>"+
+          "<div><b>1</b><span>Faça o <strong>Sinal da Cruz</strong>.</span></div>"+
+          "<div><b>2</b><span>Apresente a Deus a sua <strong>intenção</strong>.</span></div>"+
+          "<div><b>3</b><span>Leia com calma a <strong>meditação do dia</strong>.</span></div>"+
+          "<div><b>4</b><span>Pare um instante e faça a <strong>reflexão em silêncio</strong>.</span></div>"+
+          "<div><b>5</b><span>Reze a <strong>oração própria do dia</strong>.</span></div>"+
+          "<div><b>6</b><span>Reze <strong>Pai-Nosso, Ave-Maria e Glória ao Pai</strong>.</span></div>"+
+          "<div><b>7</b><span>Conclua: <strong>“Santa Teresa d’Ávila, rogai por nós.”</strong></span></div>"+
+        "</div>"+
+        "<div class='start-panel'><p>Ao tocar em iniciar, a página entra no <strong>modo oração</strong>: sem distrações, seguindo a oração até o final.</p><button id='startBtn' class='primary big-start'>🙏 Iniciar o 1º dia</button></div>"+
+      "</div>";
+    document.getElementById("startBtn").onclick=startPrayer;
+    return;
+  }
+
+  card.innerHTML=
+    heroBlock(d,date)+
+    "<div class='content ready'>"+
+      "<div class='intro-badge'>"+(isDone?"Dia concluído":"Oração de hoje")+"</div>"+
+      "<h2>"+(isDone?"Você já rezou este dia 🙏":"Tudo pronto para começar")+"</h2>"+
+      "<p class='lead'>"+(isDone?"Se desejar, você pode rezá-lo novamente. O progresso continuará marcado como concluído.":"Ao iniciar, entraremos no modo oração e você seguirá o conteúdo até o botão de finalizar o dia.")+"</p>"+
+      "<div class='buttons'><button id='startBtn' class='primary big-start'>"+(isDone?"Rezar novamente":"🙏 Iniciar oração")+"</button></div>"+
+    "</div>";
+  document.getElementById("startBtn").onclick=startPrayer;
+}
+
+function renderPrayer(card,d,date,isDone){
+  var qs="";
+  d.questions.forEach(function(q,n){qs+="<div class='reflect'><strong>"+(n+1)+".</strong> "+q+"</div>"});
+  card.innerHTML=
+    heroBlock(d,date)+
+    "<div class='content'>"+
+      "<section class='section'><h3>Comece</h3><p>Em nome do Pai, do Filho e do Espírito Santo. Amém.</p><p>Apresente em silêncio a intenção que deseja confiar ao Senhor neste dia.</p></section>"+
+      "<section class='section'><h3>Meditação</h3><p>"+d.meditation+"</p></section>"+
+      "<section class='section'><h3>Para refletir</h3>"+qs+"</section>"+
+      "<section class='section'><h3>Oração do dia</h3><div class='prayer'>"+d.prayer+"</div></section>"+
+      "<section class='section'><h3>Orações finais</h3><p>Reze um Pai-Nosso, uma Ave-Maria e um Glória ao Pai. Depois conclua: <strong>Santa Teresa d’Ávila, rogai por nós.</strong></p>"+prayerDetails()+"</section>"+
+      "<section class='section finish'><p>Quando terminar suas orações, toque no botão abaixo para concluir o dia.</p><div class='buttons'><button id='finishBtn' class='primary big-start'>✓ Finalizar o dia</button><button id='listenBtn' class='secondary'>🔊 Ouvir este dia</button></div></section>"+
+    "</div>";
+  document.getElementById("finishBtn").onclick=finishDay;
+  document.getElementById("listenBtn").onclick=listen;
+}
+
 function renderCard(){
   var card=document.getElementById("card");
   if(!unlocked(SELECTED)){
@@ -137,27 +203,19 @@ function renderCard(){
     return;
   }
   var d=DAYS[SELECTED],date=new Date(START.getTime()+SELECTED*86400000),isDone=done().indexOf(SELECTED)>=0;
-  var qs="";
-  d.questions.forEach(function(q,n){qs+="<div class='reflect'><strong>"+(n+1)+".</strong> "+q+"</div>"});
-  card.innerHTML=
-    "<div class='visual'><img src='"+IMAGES[SELECTED%IMAGES.length]+"' alt='Arte histórica relacionada a Santa Teresa d\'Ávila'><div class='vtitle'><span>"+(SELECTED+1)+"º dia • "+fmt(date)+"</span><h2>"+d.title+"</h2></div></div>"+
-    "<div class='content'>"+
-      "<section class='section'><h3>Comece</h3><p>Em nome do Pai, do Filho e do Espírito Santo. Amém.</p><p>Apresente em silêncio a intenção que deseja confiar ao Senhor neste dia.</p></section>"+
-      "<section class='section'><h3>Meditação</h3><p>"+d.meditation+"</p></section>"+
-      "<section class='section'><h3>Para refletir</h3>"+qs+"</section>"+
-      "<section class='section'><h3>Oração do dia</h3><div class='prayer'>"+d.prayer+"</div></section>"+
-      "<section class='section'><h3>Orações finais</h3><p>Reze um Pai-Nosso, uma Ave-Maria e um Glória ao Pai. Depois conclua: <strong>Santa Teresa d’Ávila, rogai por nós.</strong></p>"+prayerDetails()+"</section>"+
-      "<section class='section'><div class='buttons'><button id='doneBtn' class='primary'>"+(isDone?"✓ Dia rezado":"Marcar como rezado")+"</button><button id='listenBtn' class='secondary'>🔊 Ouvir este dia</button><button id='focusBtn' class='secondary'>☼ Modo oração</button></div></section>"+
-    "</div>";
-  document.getElementById("doneBtn").onclick=toggleDone;
-  document.getElementById("listenBtn").onclick=listen;
-  document.getElementById("focusBtn").onclick=function(){document.body.classList.toggle("focus");toast(document.body.classList.contains("focus")?"Modo oração ativado":"Modo oração encerrado")};
+  if(IN_PRAYER)renderPrayer(card,d,date,isDone);
+  else renderIntro(card,d,date,isDone);
 }
 
-function toggleDone(){
-  var d=done(),p=d.indexOf(SELECTED);
-  if(p>=0){d.splice(p,1);toast("Marcação removida")}else{d.push(SELECTED);toast("Dia marcado como rezado 🙏")}
-  saveDone(d);render();
+function finishDay(){
+  var d=done();
+  if(d.indexOf(SELECTED)<0)d.push(SELECTED);
+  saveDone(d);
+  IN_PRAYER=false;
+  document.body.classList.remove("focus");
+  render();
+  document.getElementById("card").scrollIntoView({behavior:"smooth",block:"start"});
+  toast((SELECTED+1)+"º dia concluído 🙏");
 }
 
 function listen(){
@@ -189,5 +247,5 @@ document.getElementById("share").onclick=async function(){
   }catch(e){}
 };
 
-window.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.body.classList.contains("focus")){document.body.classList.remove("focus");toast("Modo oração encerrado")}});
+window.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.body.classList.contains("focus")){IN_PRAYER=false;document.body.classList.remove("focus");renderCard();toast("Oração pausada — você pode retomar quando quiser")}});
 render();
